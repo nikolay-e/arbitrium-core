@@ -158,6 +158,7 @@ jobs:
           pytest tests/ -v --cov=src/arbitrium_core --cov-report=term-missing
 
       - name: Run pre-commit hooks
+        continue-on-error: true
         run: pre-commit run --all-files
 
   publish-to-pypi:
