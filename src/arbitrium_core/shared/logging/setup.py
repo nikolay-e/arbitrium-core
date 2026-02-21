@@ -24,6 +24,11 @@ class SensitiveDataFilter(logging.Filter):
             re.compile(r"\bAIza[A-Za-z0-9\-_]{30,40}\b"),
             "[REDACTED_GOOGLE_KEY]",
         ),
+        # xAI API keys: xai-...
+        (
+            re.compile(r"\bxai-[A-Za-z0-9\-_]{20,100}\b"),
+            "[REDACTED_XAI_KEY]",
+        ),
         # Generic API keys in common formats
         (
             re.compile(
@@ -102,26 +107,24 @@ class SensitiveDataFilter(logging.Filter):
 class DuplicateFilter(logging.Filter):
     def __init__(self) -> None:
         super().__init__()
-        self.seen_messages: set[str] = set()
+        self.seen_messages: dict[str, None] = {}
         self.max_cache_size = DEFAULT_LOG_CACHE_SIZE
 
     def filter(self, record: logging.LogRecord) -> bool:
         msg = record.getMessage()
         key = f"{record.levelname}:{msg[:200]}"
 
-        # Check if we've seen this message before
         if key in self.seen_messages:
             return False
 
-        # Add to seen messages
-        self.seen_messages.add(key)
+        self.seen_messages[key] = None
 
-        # Limit cache size to prevent unbounded memory growth
         if len(self.seen_messages) > self.max_cache_size:
-            # Clear oldest half when limit reached
-            to_remove = len(self.seen_messages) - (self.max_cache_size // 2)
-            for _ in range(to_remove):
-                self.seen_messages.pop()
+            # Evict oldest half (dict preserves insertion order since Python 3.7)
+            keys_to_keep = list(self.seen_messages.keys())[
+                self.max_cache_size // 2 :
+            ]
+            self.seen_messages = dict.fromkeys(keys_to_keep)
 
         return True
 
@@ -427,8 +430,9 @@ def setup_logging(
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
         filename = f"arbitrium_{timestamp}_logs.log"
         if log_dir:
-            os.makedirs(log_dir, exist_ok=True)
-            log_file = os.path.join(log_dir, filename)
+            resolved_dir = Path(log_dir).resolve()
+            os.makedirs(resolved_dir, exist_ok=True)
+            log_file = os.path.join(str(resolved_dir), filename)
         else:
             log_file = filename
 

@@ -312,8 +312,8 @@ def run_from_cli() -> None:
     args = parse_arguments()
 
     setup_logging(
-        debug=args.get("debug", False),
-        verbose=args.get("verbose", False),
+        debug=bool(args.get("debug", False)),
+        verbose=bool(args.get("verbose", False)),
     )
 
     from arbitrium_core.interfaces.cli.ui import configure_display

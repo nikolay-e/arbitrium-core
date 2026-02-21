@@ -490,12 +490,23 @@ class TournamentRunner:
                 all_responses[model_name] = response
         return all_responses
 
+    def _select_synthesis_model_key(self, champion_model_key: str) -> str:
+        if (
+            self.comp.judge_model_key
+            and self.comp.judge_model_key in self.comp.models
+        ):
+            return self.comp.judge_model_key
+        return champion_model_key
+
     async def _run_synthesis(
         self,
         initial_question: str,
         champion_model_key: str,
         champion_answer: str,
     ) -> str:
+        if not self.comp.features.get("synthesis_enabled", True):
+            return champion_answer
+
         all_responses = self._collect_all_final_responses()
 
         if len(all_responses) <= 1:
@@ -506,32 +517,31 @@ class TournamentRunner:
             extra={"display_type": "section_header"},
         )
 
-        kb_context = await self.comp._get_knowledge_bank_context()
+        kb_context = await self.comp.get_knowledge_bank_context()
 
         synthesis_prompt = self.comp.prompt_builder.build_synthesis_prompt(
             initial_question, all_responses, kb_context
         )
 
-        champion_model = self.comp.models[champion_model_key]
-        try:
-            response = await champion_model.generate_with_retry(
-                synthesis_prompt,
-                max_attempts=self.comp.retry_settings.get("max_attempts", 3),
-            )
-            self.comp.cost_tracker.add_cost(
-                champion_model.display_name, response.cost
-            )
+        synthesis_model_key = self._select_synthesis_model_key(
+            champion_model_key
+        )
+        response = await self.comp._execute_single_model_task(
+            model_key=synthesis_model_key,
+            prompt=synthesis_prompt,
+            context_for_logging="SYNTHESIS",
+        )
 
-            if response.is_successful and response.content.strip():
-                self.logger.info(
-                    f"Synthesis complete — combined {len(all_responses)} perspectives"
-                )
-                return response.content.strip()
-        except Exception as e:
-            self.logger.warning(
-                f"Synthesis failed, using champion answer: {e}"
+        if not response.is_error() and response.content.strip():
+            synthesized = strip_meta_commentary(
+                response.content.strip(), logger=self.logger
             )
+            self.logger.info(
+                f"Synthesis complete — combined {len(all_responses)} perspectives"
+            )
+            return synthesized
 
+        self.logger.warning("Synthesis failed, using champion answer")
         return champion_answer
 
     async def _finalize_tournament(self, initial_question: str) -> str:
@@ -540,7 +550,7 @@ class TournamentRunner:
                 "All models failed during tournament. No champion can be determined."
             )
             return "Tournament ended prematurely: All models failed or were eliminated due to errors."
-        elif len(self.comp.active_model_keys) >= 1:
+        else:
             final_model_key = self.comp.active_model_keys[0]
             final_model_anon = self.comp.anon_mapping[final_model_key]
 
@@ -583,12 +593,6 @@ class TournamentRunner:
             )
 
             return final_answer
-        else:
-            msg = f"Tournament ended with {len(self.comp.active_model_keys)} models remaining. No single champion determined."
-            self.logger.warning(
-                f"Tournament ended with {len(self.comp.active_model_keys)} models remaining (no single champion)."
-            )
-            return msg
 
 
 class ModelComparison:
@@ -705,9 +709,7 @@ class ModelComparison:
 
         return judge_model_key
 
-    async def _get_knowledge_bank_context(self) -> str:
-        self.config.get("knowledge_bank", {})
-        # User pays for full context - return ALL insights, no limits
+    async def get_knowledge_bank_context(self) -> str:
         return await self.knowledge_bank.format_insights_for_context()
 
     def _filter_valid_responses(
@@ -779,7 +781,6 @@ class ModelComparison:
         from arbitrium_core.shared.constants import DEFAULT_MODEL_TIMEOUT
 
         model = self.models[model_key]
-        self.anon_mapping.get(model_key, model.display_name)
 
         # Use task context for correlation IDs
         with self.logger.task_context(
@@ -844,11 +845,11 @@ class ModelComparison:
                     f"No cost attribute in response from {model.display_name}"
                 )
 
-            # Apply meta-commentary filtering for improvement responses
+            # Apply meta-commentary filtering for improvement and synthesis responses
             if (
                 response
                 and response.content
-                and context_for_logging == "IMPROVEMENT"
+                and context_for_logging in ("IMPROVEMENT", "SYNTHESIS")
             ):
                 cleaned_content = strip_meta_commentary(
                     response.content, logger=self.logger
@@ -1018,8 +1019,10 @@ class ModelComparison:
             extra={"display_type": "section_header"},
         )
 
-        def build_initial_prompt(model_key: str, model: BaseModel) -> str:
-            idx = self.active_model_keys.index(model_key)
+        model_key_index = {k: i for i, k in enumerate(self.active_model_keys)}
+
+        def build_initial_prompt(model_key: str, _model: BaseModel) -> str:
+            idx = model_key_index[model_key]
             return self.prompt_builder.build_initial_prompt(
                 initial_question, perspective_index=idx
             )
@@ -1146,7 +1149,7 @@ class ModelComparison:
         )
 
         # Pre-fetch knowledge bank context (async) before entering sync prompt builder
-        kb_context = await self._get_knowledge_bank_context()
+        kb_context = await self.get_knowledge_bank_context()
 
         def build_improvement_prompt(model_key: str, model: BaseModel) -> str:
             display_name = self.anon_mapping[model_key]
@@ -1391,7 +1394,6 @@ class ModelComparison:
         initial_question: str,
         collaborative_responses: dict[str, str],
     ) -> dict[str, str]:
-        self.prompts.get("evaluate", "")
         all_evaluations = {}
         evaluation_scores = {}
 

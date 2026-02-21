@@ -35,6 +35,7 @@ FEATURES: dict[str, Any] = {
     "knowledge_bank_model": "leader",  # "leader" = use current leader, or specify model key
     "llm_compression": False,  # Disabled - user pays for full context
     "compression_model": None,  # None = auto-select model with highest context window
+    "synthesis_enabled": True,  # Enable synthesis phase after champion determination
 }
 
 # Default prompts (JSON-like structured format)
@@ -47,10 +48,10 @@ PROMPTS: dict[str, Any] = {
             "Be aware of your inherent biases and actively work to counteract them. "
             "Don't be constrained by current trends or prevailing narratives - trends change, "
             "human priorities shift, and emotional reactions should not limit objective analysis. "
-            "Identify the core and outline several distinct, well-reasoned strategies to efficiently SOLVE THE PROBLEM,"
+            "Identify the core and outline several distinct, well-reasoned strategies to efficiently SOLVE THE PROBLEM, "
             "grounded in scientific principles and common sense. Avoid unfalsifiable claims, "
             "pseudoscience, and speculative nonsense. Think critically and don't hesitate to "
-            "challenge assumptions as the question can be self-restrictive."
+            "challenge assumptions as the question can be self-restrictive. "
             "When proposing tactics or metrics with incomplete evidence, DO NOT drop them; label them explicitly as heuristics. "
             "Use an evidence strength tag for every non-obvious claim: [STRONG]/[MODERATE]/[WEAK]/[ANECDOTAL], "
             "and include a confidence estimate (e.g., 0.2-0.8). "
@@ -70,7 +71,7 @@ PROMPTS: dict[str, Any] = {
             "Don't favor responses that merely align with popular sentiment - value independent "
             "thinking that challenges current trends when evidence supports it. "
             "Distinguish between verifiable insights and mere speculation. "
-            "Note which elements rely on common consensus versus proven methodology."
+            "Note which elements rely on common consensus versus proven methodology. "
             "Explicitly list high-utility details (e.g., concrete metrics, micro-behaviors) that are weakly evidenced but useful; "
             "recommend preserving them as labeled heuristics rather than removing them. "
             "Penalize deletion of unique, actionable specifics if they can be retained with uncertainty labels."
@@ -90,7 +91,7 @@ PROMPTS: dict[str, Any] = {
             "responses. Preserve it — it may be the most valuable contribution. "
             "Make the key verifiable insights the central thesis. "
             "Rebuild the entire argument around this main point, removing all generic claims, "
-            "unsubstantiated speculation, and secondary details."
+            "unsubstantiated speculation, and secondary details. "
             "Do NOT discard high-utility specifics; instead, reframe them with evidence tags and confidence levels. "
             "Translate uncited precise numbers into operational ranges or decision rules. "
             "Append a 'Heuristics Annex' that retains weakly evidenced but useful tactics, clearly labeled. "
@@ -113,7 +114,7 @@ PROMPTS: dict[str, Any] = {
             "Be aware that all analysis contains inherent biases - evaluate whether the answer "
             "acknowledges and addresses its own potential biases. Does it demonstrate intellectual "
             "independence by challenging prevailing trends when warranted, or does it merely "
-            "echo popular sentiment? Be critical of both originality and factual grounding."
+            "echo popular sentiment? Be critical of both originality and factual grounding. "
             "Reward explicit evidence tags, confidence reporting, and retention of useful heuristics in an annex. "
             "Down-rank answers that delete actionable details without justification or fail to provide a Change Log. "
             "Check that precise claims without sources were converted to ranges/tests rather than removed."

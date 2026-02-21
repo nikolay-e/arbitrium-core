@@ -71,14 +71,12 @@ SYNTHESIS_PROMPT_TEMPLATE = """
 
 {all_responses_section}
 {knowledge_section}
+
 CRITICAL INSTRUCTIONS FOR YOUR RESPONSE:
 
 1. OUTPUT ONLY THE SYNTHESIZED ANSWER - nothing else
-2. Preserve EVERY unique finding, evidence, and perspective from ALL responses
-3. Where experts disagree, present both views with evidence quality assessment
-4. Do not discard minority findings - they may be the most valuable
-5. The synthesis must be MORE COMPLETE than any individual response
-6. START IMMEDIATELY with the actual content of your synthesized answer
+2. DO NOT add preambles, greetings, or meta-commentary
+3. START IMMEDIATELY with the actual content of your synthesized answer
 """.strip()
 
 EVALUATION_PROMPT_TEMPLATE = """
