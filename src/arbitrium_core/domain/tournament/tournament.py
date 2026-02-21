@@ -240,6 +240,7 @@ class TournamentRunner:
         phase_name: str,
         answer_index: int,
         round_num: int | None = None,
+        evaluation_context: dict[str, dict[str, str]] | None = None,
     ) -> bool:
         phase_config = self.comp.config.get(config_key, {})
 
@@ -276,6 +277,15 @@ class TournamentRunner:
                     "No feedback collected, proceeding without it"
                 )
                 feedback_context = None
+
+        if evaluation_context:
+            if feedback_context is None:
+                feedback_context = evaluation_context
+            else:
+                for model_name, eval_feedbacks in evaluation_context.items():
+                    if model_name not in feedback_context:
+                        feedback_context[model_name] = {}
+                    feedback_context[model_name].update(eval_feedbacks)
 
         action_word = "refined" if round_num is not None else "improved"
         self.logger.info(f"Generating {action_word} responses...")
@@ -381,17 +391,45 @@ class TournamentRunner:
             if len(self.comp.active_model_keys) <= 1:
                 break
 
+            evaluation_context = self._format_evaluations_as_context()
+
             if not await self._run_refinement_strategy(
-                initial_question, round_num
+                initial_question,
+                round_num,
+                evaluation_context=evaluation_context,
             ):
                 break
 
             round_num += 1
 
+    def _format_evaluations_as_context(
+        self,
+    ) -> dict[str, dict[str, str]] | None:
+        if (
+            not hasattr(self.comp, "all_evaluations")
+            or not self.comp.all_evaluations
+        ):
+            return None
+
+        combined_text = "\n\n".join(
+            f"Evaluator {name}:\n{text}"
+            for name, text in self.comp.all_evaluations.items()
+        )
+
+        active_names = [
+            self.comp.anon_mapping[k] for k in self.comp.active_model_keys
+        ]
+
+        return {
+            name: {"Tournament Evaluation": combined_text}
+            for name in active_names
+        }
+
     async def _run_refinement_strategy(
         self,
         initial_question: str,
         round_num: int,
+        evaluation_context: dict[str, dict[str, str]] | None = None,
     ) -> bool:
         return await self._run_improvement_phase(
             initial_question,
@@ -399,6 +437,7 @@ class TournamentRunner:
             phase_name="Refinement Phase",
             answer_index=-1,
             round_num=round_num,
+            evaluation_context=evaluation_context,
         )
 
     async def _handle_elimination(
@@ -533,13 +572,10 @@ class TournamentRunner:
         )
 
         if not response.is_error() and response.content.strip():
-            synthesized = strip_meta_commentary(
-                response.content.strip(), logger=self.logger
-            )
             self.logger.info(
                 f"Synthesis complete — combined {len(all_responses)} perspectives"
             )
-            return synthesized
+            return response.content.strip()
 
         self.logger.warning("Synthesis failed, using champion answer")
         return champion_answer
