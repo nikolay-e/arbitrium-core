@@ -11,6 +11,7 @@ from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 import yaml
+
 from certamen_core.interfaces.cli.main import App
 
 

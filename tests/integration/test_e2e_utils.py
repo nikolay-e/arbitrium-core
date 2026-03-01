@@ -1,6 +1,7 @@
 """End-to-end tests for utility functions and exception handling."""
 
 import pytest
+
 from certamen_core.domain.errors import (
     APIError,
     AuthenticationError,

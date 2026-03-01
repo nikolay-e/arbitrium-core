@@ -9,6 +9,7 @@ from typing import Any
 
 import pytest
 import pytest_asyncio
+
 from certamen_core import Certamen
 from certamen_core.infrastructure.llm.registry import ProviderRegistry
 from certamen_core.ports.llm import BaseModel, ModelResponse

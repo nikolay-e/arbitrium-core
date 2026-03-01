@@ -1,9 +1,9 @@
 """End-to-end tests for error handling and edge cases."""
 
 import pytest
+
 from certamen_core import Certamen
 from certamen_core.application.bootstrap import health_check_models
-
 from tests.integration.conftest import MockModel
 
 

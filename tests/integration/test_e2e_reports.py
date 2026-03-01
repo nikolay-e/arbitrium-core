@@ -3,6 +3,7 @@
 from typing import Any
 
 import pytest
+
 from certamen_core.domain.tournament.report import ReportGenerator
 
 
@@ -234,7 +235,8 @@ class TestComplexReportContent:
         mock_host: MockHost,
     ) -> None:
         """Test report with nested markdown structures."""
-        content = {"analysis": """
+        content = {
+            "analysis": """
 ## Key Findings
 
 1. First finding
@@ -244,7 +246,8 @@ class TestComplexReportContent:
 
 - Point A
 - Point B
-"""}
+"""
+        }
 
         result = await report_generator.save_report("analysis", content)
 
@@ -260,14 +263,16 @@ class TestComplexReportContent:
         mock_host: MockHost,
     ) -> None:
         """Test report with code blocks."""
-        content = {"solution": """
+        content = {
+            "solution": """
 Here's the solution:
 
 ```python
 def hello():
     print("Hello")
 ```
-"""}
+"""
+        }
 
         result = await report_generator.save_report("code_report", content)
 

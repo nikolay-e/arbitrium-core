@@ -1,10 +1,10 @@
 """End-to-end tests for model factory."""
 
 import pytest
+
 from certamen_core.application.bootstrap import (
     create_models as create_models_from_config,
 )
-
 from tests.integration.conftest import MockModel
 
 

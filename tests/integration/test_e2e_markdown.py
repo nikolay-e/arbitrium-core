@@ -1,6 +1,7 @@
 """End-to-end tests for markdown utilities."""
 
 import pytest
+
 from certamen_core.shared.text.markdown import (
     adjust_markdown_headers,
     sanitize_content_dict,

@@ -1,6 +1,7 @@
 """Simple smoke tests with real LLM (ollama) - no mocks, no overengineering."""
 
 import pytest
+
 from certamen_core.infrastructure.llm.litellm_adapter import LiteLLMModel
 
 

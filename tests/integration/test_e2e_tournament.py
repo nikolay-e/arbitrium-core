@@ -1,8 +1,8 @@
 """End-to-end tests for tournament workflows."""
 
 import pytest
-from certamen_core import Certamen
 
+from certamen_core import Certamen
 from tests.integration.conftest import MockModel
 
 

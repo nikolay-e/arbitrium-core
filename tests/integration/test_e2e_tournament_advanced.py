@@ -1,9 +1,9 @@
 """Advanced end-to-end tests for tournament edge cases and advanced scenarios."""
 
 import pytest
+
 from certamen_core import Certamen
 from certamen_core.ports.llm import ModelResponse
-
 from tests.integration.conftest import MockModel
 
 

@@ -5,11 +5,11 @@ from pathlib import Path
 
 import pytest
 import yaml
+
 from certamen_core import Certamen
 from certamen_core.application.bootstrap import health_check_models
 from certamen_core.domain.errors import ConfigurationError
 from certamen_core.infrastructure.config.loader import validate_config
-
 from tests.integration.conftest import MockModel
 
 

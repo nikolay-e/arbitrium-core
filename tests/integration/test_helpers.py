@@ -7,7 +7,6 @@ duplication across the test suite.
 from typing import Any
 
 from certamen_core import Certamen
-
 from tests.integration.conftest import MockModel
 
 # ==================== Common Setup Helpers ====================

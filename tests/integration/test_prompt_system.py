@@ -9,13 +9,13 @@ Tests the refactored prompt management:
 """
 
 import pytest
+
 from certamen_core import Certamen
 from certamen_core.domain.prompts import PromptBuilder, PromptFormatter
 from certamen_core.infrastructure.config.defaults import (
     PROMPTS,
     select_model_with_highest_context,
 )
-
 from tests.integration.conftest import MockModel
 
 

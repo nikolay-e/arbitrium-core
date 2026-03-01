@@ -1,8 +1,8 @@
 """End-to-end tests for tournament failure scenarios and error paths."""
 
 import pytest
-from certamen_core import Certamen
 
+from certamen_core import Certamen
 from tests.integration.conftest import MockModel
 
 

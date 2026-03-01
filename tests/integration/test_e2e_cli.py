@@ -5,9 +5,9 @@ from unittest.mock import AsyncMock, patch
 
 import pytest
 import yaml
+
 from certamen_core.domain.errors import FatalError
 from certamen_core.interfaces.cli.main import App
-
 from tests.integration.conftest import MockModel
 
 

@@ -3,6 +3,7 @@
 from typing import Any
 
 import pytest
+
 from certamen_core import Certamen
 from certamen_core.infrastructure.llm.registry import ProviderRegistry
 from certamen_core.ports.llm import BaseModel, ModelResponse
@@ -184,9 +185,7 @@ async def test_judge_normalization_removes_bias(tmp_output_dir):
     certamen._healthy_models["generous"] = generous_model
 
     # Run tournament
-    result, metrics = await certamen.run_tournament(
-        "Test judge normalization"
-    )
+    result, metrics = await certamen.run_tournament("Test judge normalization")
 
     # Verify tournament completed
     assert result is not None

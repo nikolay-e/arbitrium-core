@@ -1,8 +1,8 @@
 """Simple E2E tests that don't require full tournament execution."""
 
 import pytest
-from certamen_core import Certamen
 
+from certamen_core import Certamen
 from tests.integration.conftest import MockModel
 
 

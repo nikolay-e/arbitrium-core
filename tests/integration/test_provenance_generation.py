@@ -5,6 +5,7 @@ import tempfile
 from pathlib import Path
 
 import pytest
+
 from certamen_core.domain.reporting.provenance import ProvenanceReport
 
 
