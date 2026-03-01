@@ -22,7 +22,7 @@ models:
 
   claude:
     provider: anthropic
-    model_name: anthropic/claude-opus-4-5-20251101
+    model_name: anthropic/claude-opus-4-6
     display_name: "Claude"
     temperature: 0.7
     max_tokens: 4096
@@ -32,7 +32,7 @@ models:
 
   gemini:
     provider: google
-    model_name: gemini/gemini-3-pro-preview
+    model_name: gemini/gemini-3.1-pro-preview
     display_name: "Gemini"
     temperature: 0.7
     max_tokens: 4096
@@ -49,6 +49,13 @@ models:
     reasoning_effort: high
     web_search_options:
       search_context_size: high
+
+  deepseek:
+    provider: deepseek
+    model_name: deepseek/deepseek-reasoner
+    display_name: "DeepSeek"
+    temperature: 0.7
+    max_tokens: 4096
 
 # Tournament configuration
 tournament:
